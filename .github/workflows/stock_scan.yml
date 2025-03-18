@@ -1,0 +1,26 @@
+name: Daily Tech Stock Scan
+
+on:
+  schedule:
+    - cron: "0 13 * * *"  # 每天 UTC 13:00（台灣時間 21:00）運行
+  workflow_dispatch:  # 允許手動執行
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 下載 Repository
+        uses: actions/checkout@v3
+
+      - name: 設定 Python 環境
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: 安裝依賴套件
+        run: pip install -r requirements.txt
+
+      - name: 執行 Python 程式
+        env:
+          LINE_TOKEN: ${{ secrets.LINE_TOKEN }}
+        run: python stock/tech_stock_scanner.py
