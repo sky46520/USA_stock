@@ -1,0 +1,64 @@
+import requests
+import yfinance as yf
+import pandas as pd
+import time
+
+# LINE Notify 設定（請替換你的 Token）
+LINE_TOKEN = "你的_LINE_Notify_Token"
+LINE_NOTIFY_URL = "https://notify-api.line.me/api/notify"
+
+def send_line_message(message):
+    """發送通知到 LINE"""
+    headers = {"Authorization": f"Bearer {LINE_TOKEN}"}
+    data = {"message": message}
+    requests.post(LINE_NOTIFY_URL, headers=headers, data=data)
+
+def get_stock_data(ticker):
+    """獲取 Yahoo Finance 的股票數據"""
+    stock = yf.Ticker(ticker)
+    info = stock.info
+    return {
+        "ticker": ticker,
+        "price": info.get("currentPrice"),
+        "PE": info.get("forwardPE", 0),
+        "PB": info.get("priceToBook", 0),
+        "RSI": info.get("rsi", 50),
+        "Revenue Growth": info.get("revenueGrowth", 0),
+        "EPS Growth": info.get("earningsGrowth", 0),
+    }
+
+def filter_stocks(stock_list):
+    """篩選符合條件的科技股"""
+    results = []
+    for ticker in stock_list:
+        try:
+            data = get_stock_data(ticker)
+            if (
+                data["PE"] < 25 and  # 低於產業平均
+                data["PB"] < 5 and  # 市淨率低
+                data["RSI"] < 30 and  # 技術超賣
+                data["Revenue Growth"] > 0.1 and  # 營收增長 >10%
+                data["EPS Growth"] > 0.1  # EPS 增長 >10%
+            ):
+                results.append(data)
+        except Exception as e:
+            print(f"Error processing {ticker}: {e}")
+        time.sleep(1)
+    return results
+
+# 設定科技股清單（可以換成自己關注的標的）
+tech_stocks = ["AAPL", "MSFT", "NVDA", "TSLA", "GOOGL", "AMZN", "META"]
+
+# 選股篩選
+filtered_stocks = filter_stocks(tech_stocks)
+
+# 產生通知內容
+if filtered_stocks:
+    message = "\n美股科技股便宜標的：\n"
+    for stock in filtered_stocks:
+        message += f"{stock['ticker']} - 現價: ${stock['price']}, PE: {stock['PE']}, RSI: {stock['RSI']}\n"
+    send_line_message(message)
+else:
+    send_line_message("今天沒有符合條件的科技股標的。")
+
+print("分析完成，結果已發送到 LINE。")
