@@ -41,7 +41,7 @@ def check_growth(ticker):
 qualified_stocks = []
 
 for idx, ticker in enumerate(tickers, start=1):
-    print(f"處理第 {idx}/{len(tickers)} 檔: {ticker}")  # 這行一定要確保完整且正確
+print(f"Processing stock {idx}/{len(tickers)}: {ticker}")
     if check_growth(ticker):
         qualified_stocks.append(ticker)
 
