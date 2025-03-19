@@ -2,8 +2,8 @@ import yfinance as yf
 import pandas as pd
 import time
 
-# 讀取下載後的NASDAQ CSV
-file_path = r"C:\Users\hungronnie\Desktop\make\nasdaq_screener.csv"
+# 改成相對路徑（同資料夾內）
+file_path = "nasdaq_screener.csv"
 stock_df = pd.read_csv(file_path)
 tickers = stock_df['Symbol'].tolist()
 
@@ -41,16 +41,4 @@ def check_growth(ticker):
 qualified_stocks = []
 
 for idx, ticker in enumerate(tickers, start=1):
-    print(f"處理第 {idx}/{len(tickers)} 檔: {ticker}")
-    if check_growth(ticker):
-        qualified_stocks.append(ticker)
-
-    # 避免短時間過多請求導致IP被封，建議間隔0.5秒以上
-    time.sleep(0.5)
-
-# 將結果存成CSV檔
-result_df = pd.DataFrame(qualified_stocks, columns=['Ticker'])
-output_path = r"C:\Users\hungronnie\Desktop\make\qualified_stocks.csv"
-result_df.to_csv(output_path, index=False)
-
-print("篩選完成！結果存入:", output_path)
+    print(f"處理第 {idx}/{len(tickers
